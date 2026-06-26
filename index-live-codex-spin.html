@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cortex — captured spend run alternate</title>
+<style>
+:root{
+  --paper:#f3eadb;--paper2:#fff8ec;--ink:#14202d;--ink2:#263445;--muted:#6c5f51;--line:#d4c5ae;
+  --cobalt:#2554a4;--amber:#b4641d;--ruby:#9e2636;--sage:#6b7f53;--smoke:#e6d8c3;--shadow:0 24px 70px -48px rgba(28,23,16,.8);
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--serif:Georgia,"Times New Roman",serif;
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:linear-gradient(135deg,#efe2cc,#f8f1e8 38%,#eadcc5);color:var(--ink);font-family:var(--sans);line-height:1.45}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 12% 8%,rgba(37,84,164,.12),transparent 28%),radial-gradient(circle at 85% 12%,rgba(180,100,29,.13),transparent 28%),linear-gradient(90deg,rgba(20,32,45,.045) 1px,transparent 1px),linear-gradient(rgba(20,32,45,.035) 1px,transparent 1px);background-size:auto,auto,48px 48px,48px 48px}
+.wrap{width:min(1260px,calc(100% - 44px));margin:0 auto}header{position:sticky;top:0;z-index:20;background:rgba(255,248,236,.78);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}.nav{height:70px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:21px;letter-spacing:-.03em}.mark{width:38px;height:38px;border:2px solid var(--ink);display:grid;place-items:center;border-radius:12px;background:var(--paper2);font-family:var(--mono)}.mode{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.hero{padding:38px 0 18px}.hero-grid{display:grid;grid-template-columns:minmax(0,1.05fr) .95fr;gap:22px;align-items:end}.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--cobalt);font-weight:800}h1{font-family:var(--serif);font-weight:400;font-size:clamp(2.4rem,5.3vw,5rem);line-height:.94;margin:12px 0;color:var(--ink)}.lead{font-size:19px;max-width:760px;color:var(--ink2)}.pledge{background:rgba(255,248,236,.75);border:1px solid var(--line);border-radius:20px;padding:18px 20px;box-shadow:var(--shadow)}.pledge b{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;color:var(--amber)}.pledge p{margin:0;color:var(--muted);font-size:14px}
+.toolbar{display:flex;align-items:center;gap:12px;margin-top:20px;flex-wrap:wrap}button{font:700 14px var(--sans);border:1px solid var(--ink);border-radius:999px;padding:12px 18px;background:var(--ink);color:var(--paper2);cursor:pointer;box-shadow:0 10px 24px -18px rgba(20,32,45,.8)}button.secondary{background:transparent;color:var(--ink)}button.warn{background:var(--ruby);border-color:var(--ruby)}button.good{background:var(--cobalt);border-color:var(--cobalt)}button:disabled{opacity:.48;cursor:not-allowed}.status{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.metrics{display:grid;grid-template-columns:1.1fr repeat(4,1fr);gap:14px;margin:18px 0 18px}.metric{background:rgba(255,248,236,.75);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow)}.metric span{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}.metric b{font-family:var(--serif);font-size:32px;font-weight:400}.metric .tiny{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:6px}.meter{height:9px;background:var(--smoke);border:1px solid rgba(20,32,45,.08);border-radius:999px;overflow:hidden;margin-top:12px}.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cobalt),var(--amber));transition:width .45s cubic-bezier(.2,.8,.2,1)}
+.board{background:rgba(255,248,236,.55);border:1px solid var(--line);border-radius:28px;padding:22px;box-shadow:var(--shadow)}.flow{position:relative;min-height:420px;border:1px solid rgba(20,32,45,.13);border-radius:24px;background:linear-gradient(180deg,rgba(255,255,255,.42),rgba(255,248,236,.68));overflow:hidden}.flow svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.wire{fill:none;stroke:rgba(20,32,45,.24);stroke-width:2;stroke-dasharray:8 9;transition:.3s}.wire.hot{stroke:var(--cobalt);stroke-width:3;animation:dash 1s linear infinite}.wire.hot.escalate{stroke:var(--amber)}.wire.hot.deny{stroke:var(--ruby)}@keyframes dash{to{stroke-dashoffset:-34}}
+.card{position:absolute;background:var(--paper2);border:1px solid var(--line);border-radius:18px;padding:15px 16px;box-shadow:0 18px 40px -34px rgba(20,32,45,.85);transition:.35s cubic-bezier(.2,.8,.2,1);min-width:190px}.card.lit{transform:translateY(-3px);box-shadow:0 22px 48px -32px rgba(20,32,45,.9),0 0 0 2px rgba(37,84,164,.14)}.card h3{margin:0 0 7px;font-size:16px;line-height:1.1}.card .sub{font-family:var(--mono);font-size:12px;color:var(--muted)}.card .data{font-family:var(--mono);font-size:12px;margin-top:9px;word-break:break-all}.chip{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:3px 8px;font-family:var(--mono);font-size:10.5px;color:var(--muted);margin:3px 4px 0 0;background:rgba(20,32,45,.025)}
+#agent{left:5%;top:62%;width:230px}#models{left:27%;top:37%;width:255px}#ultra{left:31%;top:8%;width:240px;border-style:dashed}#gate{left:52%;top:47%;width:235px}#outcome{right:4%;top:28%;width:250px}#audit{right:4%;top:61%;width:250px}
+.verdict{font-family:var(--serif);font-size:38px;line-height:1;color:var(--ink);margin:6px 0}.verdict.allow{color:var(--cobalt)}.verdict.escalate{color:var(--amber)}.verdict.deny{color:var(--ruby)}.sandbox{position:absolute;left:3.3%;top:27%;width:58%;height:64%;border:2px solid rgba(107,127,83,.42);border-radius:28px;background:rgba(107,127,83,.06)}.sandbox-label{position:absolute;left:5%;top:29%;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--sage);font-weight:900}
+.panels{display:grid;grid-template-columns:.9fr 1.1fr;gap:16px;margin-top:16px}.panel{background:rgba(255,248,236,.75);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--shadow)}.panel h2{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}.xrow{display:grid;grid-template-columns:130px 1fr;gap:12px;padding:8px 0;border-top:1px solid var(--line)}.xrow:first-of-type{border-top:0}.k{font-family:var(--mono);font-size:12px;color:var(--muted)}.v{font-family:var(--mono);font-size:12.5px;word-break:break-all}.v.match{color:var(--cobalt);font-weight:800}.v.warn{color:var(--amber);font-weight:800}.v.bad{color:var(--ruby);font-weight:800}
+.queue{display:none;margin-top:16px}.queue.show{display:block}.qitem{display:grid;grid-template-columns:160px 1fr auto;gap:12px;align-items:center;border:1px solid var(--line);border-radius:16px;background:rgba(255,248,236,.82);padding:12px 14px;margin-top:8px;cursor:pointer;transition:.25s}.qitem:hover{border-color:var(--amber);transform:translateX(3px)}.qitem.removed{opacity:0;transform:translateX(12px);max-height:0;overflow:hidden;margin:0;padding:0;border:0}.qmerchant{font-weight:800}.qmeta{font-family:var(--mono);font-size:12px;color:var(--muted)}.qtag{font-family:var(--mono);font-size:11px;border:1px solid rgba(180,100,29,.35);color:var(--amber);border-radius:999px;padding:4px 8px}
+.approval{display:none;margin-top:16px;border:2px solid var(--amber);background:#fff3df;border-radius:20px;padding:16px}.approval.open{display:block}.approval h3{margin:0 0 6px}.approval p{margin:0 0 12px;color:var(--muted)}
+.tablewrap{margin:18px 0 42px;background:rgba(255,248,236,.75);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:var(--shadow)}table{width:100%;border-collapse:collapse}th,td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left;font-size:13px;vertical-align:top}th{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:rgba(20,32,45,.035)}td{font-family:var(--mono)}tr.flash td{background:rgba(37,84,164,.08)}.pill{display:inline-flex;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:800}.pill.allow{background:rgba(37,84,164,.11);color:var(--cobalt)}.pill.escalate{background:rgba(180,100,29,.12);color:var(--amber)}.pill.deny{background:rgba(158,38,54,.11);color:var(--ruby)}.note{font-size:12.5px;color:var(--muted)}
+@media(max-width:900px){.hero-grid,.metrics,.panels{grid-template-columns:1fr}.flow{min-height:760px}.sandbox{left:3%;top:20%;width:94%;height:50%}.sandbox-label{top:22%;font-size:10px}#ultra,#models,#agent,#gate,#outcome,#audit{left:6%;right:auto;width:88%}#ultra{top:4%}#models{top:25%}#agent{top:48%}#gate{top:61%}#outcome{top:75%}#audit{top:88%}.flow svg{display:none}.qitem{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav"><div class="brand"><div class="mark">Cx</div><div>Cortex</div></div><div class="mode">alternate captured replay · no notify side effects</div></div></header>
+<main class="wrap">
+<section class="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="eyebrow">Captured spend governance replay</div>
+      <h1>Money only moves after the gate.</h1>
+      <p class="lead">This is a separate Codex spin on the same run data: Hermes requests spend, the Nemotron family frames the work, Cortex gates the action, and the ledger proves what actually happened.</p>
+      <div class="toolbar"><button id="play">▶ Play captured run</button><button class="secondary" id="step">Step</button><button class="secondary" id="reset">Reset</button><span class="status" id="status">ready · local-only alternate</span></div>
+    </div>
+    <aside class="pledge"><b>Honesty contract</b><p>Amounts, request IDs, hashes, sandbox refs, receipts, and captured human resolution come from the embedded run. Model-lane wording is role framing unless future capture adds explicit per-beat routing telemetry. This alternate does not POST notifications.</p></aside>
+  </div>
+</section>
+<section class="metrics">
+  <div class="metric"><span>operation window</span><b id="opWindow">—</b><div class="meter"><i id="meter"></i></div><div class="tiny" id="meterText">—</div></div>
+  <div class="metric"><span>captured through gate</span><b id="capturedTotal">—</b><div class="tiny">sum of all captured requests</div></div>
+  <div class="metric"><span>charged in Stripe test</span><b id="chargedTotal">—</b><div class="tiny">ALLOW with receipts</div></div>
+  <div class="metric"><span>held for human</span><b id="heldTotal">—</b><div class="tiny">ESCALATE decisions</div></div>
+  <div class="metric"><span>blocked before money</span><b id="blockedTotal">—</b><div class="tiny">DENY amount</div></div>
+</section>
+<section class="board">
+  <div class="flow" id="flow">
+    <div class="sandbox"></div><div class="sandbox-label">security sandbox · Nemoclaw landlock · RTX 4090 contained run</div>
+    <svg viewBox="0 0 1000 420" preserveAspectRatio="none">
+      <path id="w1" class="wire" d="M160 285 C210 250 235 220 300 190"></path>
+      <path id="w2" class="wire" d="M385 190 C420 150 420 105 390 70"></path>
+      <path id="w3" class="wire" d="M420 210 C500 210 515 215 555 225"></path>
+      <path id="w4" class="wire" d="M660 225 C730 180 775 140 830 128"></path>
+      <path id="w5" class="wire" d="M660 240 C735 260 775 270 830 276"></path>
+      <path id="w6" class="wire" d="M660 258 C735 312 775 320 830 330"></path>
+      <path id="w7" class="wire" d="M585 280 L585 385"></path>
+    </svg>
+    <article class="card" id="agent"><h3>Hermes agent</h3><div class="sub">spend proposer</div><div class="data" id="agentData">idle</div></article>
+    <article class="card" id="models"><h3>Nemotron family</h3><div class="sub">right model for each job</div><span class="chip">Nano · dirty triage</span><span class="chip">30B a3b · extract</span><span class="chip">local 4090</span><div class="data" id="modelData">route: not captured yet</div></article>
+    <article class="card" id="ultra"><h3>Nemotron 3 Ultra</h3><div class="sub">external exception audit reviewer</div><span class="chip">OpenRouter route</span><div class="data" id="ultraData"></div></article>
+    <article class="card" id="gate"><h3>Cortex gate</h3><div class="verdict" id="verdict">—</div><div class="sub" id="gateData">policy decision pending</div></article>
+    <article class="card" id="outcome"><h3>Outcome</h3><div class="sub" id="outcomeData">waiting for first request</div><div class="data" id="moneyData">$0 charged</div></article>
+    <article class="card" id="audit"><h3>Ledger spine</h3><div class="sub">one request id · three surfaces</div><div class="data" id="spineData">hash chain idle</div></article>
+  </div>
+  <div class="panels">
+    <section class="panel"><h2>Cross-reference</h2><div id="xref"></div></section>
+    <section class="panel"><h2>Pending human approvals</h2><div class="note">Click a queued request to resolve it on-screen. Captured resolution can chain; what-if approvals clear the queue but do not write a ledger row.</div><div class="queue" id="queue"></div><div class="approval" id="approval"><h3 id="apTitle">Approval</h3><p id="apText"></p><button class="good" id="approve">Approve on screen</button> <button class="warn" id="deny">Deny on screen</button></div></section>
+  </div>
+</section>
+<section class="tablewrap"><table><thead><tr><th>#</th><th>verdict</th><th>merchant</th><th>amount</th><th>rule</th><th>model lane</th><th>request id</th><th>hash / receipt</th></tr></thead><tbody id="ledger"></tbody></table></section>
+</main>
+<script type="application/json" id="beats-json">[{"verdict":"ALLOW","agent":"hermes-operator","task":"buy-inference","merchant":"openai","amount":12.0,"request_id":"req_9442eae42dbd1d45","rule_fired":"ok","entry_hash":"5bb856bb0a31a15473587e0f959998f8ca3157d91678ebd3b16b760ed369f882","sandbox_ref":"nemoclaw:cerebro-spend:a80b9888ce07#1","stripe_receipt":"ch_3TjXH9BUQ4KlPGPn08n8ckcT"},{"verdict":"ALLOW","agent":"hermes-operator","task":"buy-inference","merchant":"anthropic","amount":80.0,"request_id":"req_5f59c9a84e790eb1","rule_fired":"ok","entry_hash":"0be988354847474fb5d7ede36b7b263993d538beb5fbf89daf6d226ad858dd21","sandbox_ref":"nemoclaw:cerebro-spend:a80b9888ce07#2","stripe_receipt":"ch_3TjXHABUQ4KlPGPn0KDb8xwl"},{"verdict":"ALLOW","agent":"hermes-operator","task":"buy-tooling","merchant":"github","amount":8.0,"request_id":"req_42a962782953cefa","rule_fired":"ok","entry_hash":"8bbf120fede4a315d4a16a81c12fb82266f3aa132b4331a596b1b84e159133fa","sandbox_ref":"nemoclaw:cerebro-spend:a80b9888ce07#3","stripe_receipt":"ch_3TjXHBBUQ4KlPGPn0FcYSqn1"},{"verdict":"ESCALATE","agent":"hermes-operator","task":"deploy","merchant":"vercel","amount":150.0,"request_id":"req_de0920b523f4b84c","rule_fired":"amount.per_txn_cap","entry_hash":"26ec6724d8c4712f9e508b34be45ead831fb8775ed0d632c059cd53508c9e1d5","sandbox_ref":"nemoclaw:cerebro-spend:a80b9888ce07#4","stripe_receipt":null},{"verdict":"ESCALATE","agent":"hermes-operator","task":"trial","merchant":"newsaas","amount":40.0,"request_id":"req_21259e18ca6e711d","rule_fired":"vendor.not_allowlisted","entry_hash":"345f457e3ca26b2dffc07aeb559c6226375a8e0edf24d6e0d344e333eef8d4f7","sandbox_ref":"nemoclaw:cerebro-spend:a80b9888ce07#5","stripe_receipt":null,"resolution":{"approver":"Operator","verdict":"ALLOW","rule_fired":"escalation.approved","entry_hash":"b458d885b88c618f15641ac89f7ae73167b9479ecd4a02b2043a3810d6cc80e8"}},{"verdict":"ESCALATE","agent":"hermes-operator","task":"campaign","merchant":"openai","amount":25.0,"request_id":"req_5af8103d1b01588e","rule_fired":"purpose.unbound","entry_hash":"37e374d649f2e7ac80f747374720418ed2c786cd5db5bfc2af6cf68b50d7bd77","sandbox_ref":"nemoclaw:cerebro-spend:a80b9888ce07#6","stripe_receipt":null},{"verdict":"DENY","agent":"hermes-operator","task":"scale","merchant":"aws","amount":600.0,"request_id":"req_f8a2d50bad512e50","rule_fired":"amount.hard_max","entry_hash":"f24236ae48465f209f76fae1b59f116359b57b7130c7e2c2d12d2388e4b5ac78","sandbox_ref":"nemoclaw:cerebro-spend:a80b9888ce07#7","stripe_receipt":null},{"verdict":"DENY","agent":"hermes-operator","task":"procure","merchant":"sanctioned-vendor","amount":50.0,"request_id":"req_a94cb06f250ed5af","rule_fired":"vendor.deny","entry_hash":"21367edf8e145e76132828f43507b1f29087d11a140842ea07e26d7ad5d5c1f2","sandbox_ref":"nemoclaw:cerebro-spend:a80b9888ce07#8","stripe_receipt":null},{"verdict":"DENY","agent":"hermes-operator","task":"speculate","merchant":"coinbase","amount":30.0,"request_id":"req_71bb965ab1d7734a","rule_fired":"category.deny","entry_hash":"c2396bae4097d0bba79dbbf7f67b43aeb29017c7118579e1759337ad994440af","sandbox_ref":"nemoclaw:cerebro-spend:a80b9888ce07#9","stripe_receipt":null},{"verdict":"DENY","agent":"hermes-operator","task":"buy-eu","merchant":"openai","amount":20.0,"request_id":"req_1dd8d56358894149","rule_fired":"invalid_request.currency","entry_hash":"f63d278cd7d19d73df369a4f01379183ca0760f78773dc7fe3a0341cd69a62e9","sandbox_ref":"nemoclaw:cerebro-spend:a80b9888ce07#10","stripe_receipt":null}]</script>
+<script type="application/json" id="meta-json">{"budget":300.0,"operation_window":100000.0,"operation_window_source":"policy.rate_window.max_amount","per_txn_cap":100.0,"hard_max":500.0,"policy_sha256":"fd64c9f8abc3f06eb4b5eb09e893999aed1ce83650c34e6fcdaa807767213dd1","charged_total":100.0,"n_esc":3,"n_deny":4,"sandbox_gpu":"NVIDIA GeForce RTX 4090","inference":"OpenRouter (compatible-endpoint)","chain_verified":true,"real":true}</script>
+<script>
+const BEATS=JSON.parse(document.getElementById('beats-json').textContent);
+const META=JSON.parse(document.getElementById('meta-json').textContent);
+const $=id=>document.getElementById(id);
+const money=n=>Number(n||0).toLocaleString(undefined,{style:'currency',currency:'USD'});
+const short=s=>s?String(s).slice(0,12)+'…':'—';
+let idx=-1, timer=null, governed=0, charged=0, blocked=0, queue=[], selected=null, written=0, whatIf=0;
+const total=BEATS.reduce((a,b)=>a+Number(b.amount||0),0);
+const chargedCaptured=BEATS.filter(b=>b.stripe_receipt).reduce((a,b)=>a+Number(b.amount||0),0);
+const blockedCaptured=BEATS.filter(b=>b.verdict==='DENY').reduce((a,b)=>a+Number(b.amount||0),0);
+function lane(b){
+  const hard=/hard|max|deny|invalid|unbound|not_allowlisted|per_txn|currency/i.test(b.rule_fired||'');
+  if(hard) return 'Nano triage → 30B extract → Ultra exception-audit*';
+  return 'Nano triage → 30B extract*';
+}
+function setX(b, extra=''){
+  $('xref').innerHTML='';
+  const rows=[['request id',b?.request_id],['policy rule',b?.rule_fired],['ledger hash',short(b?.entry_hash)],['stripe receipt',b?.stripe_receipt||'—'],['sandbox event',b?.sandbox_ref],['status note',extra||'captured event']];
+  for(const [k,v] of rows){const r=document.createElement('div');r.className='xrow';const kk=document.createElement('div');kk.className='k';kk.textContent=k;const vv=document.createElement('div');vv.className='v '+(v&&v!=='—'?'match':'');vv.textContent=v||'—';r.append(kk,vv);$('xref').appendChild(r);}
+}
+function resetCards(){['agent','models','ultra','gate','outcome','audit'].forEach(id=>$(id).classList.remove('lit'));['w1','w2','w3','w4','w5','w6','w7'].forEach(id=>$(id).className.baseVal='wire');$('verdict').textContent='—';$('verdict').className='verdict';}
+function addRow(b,n,kind='captured'){
+  const tr=document.createElement('tr');tr.className='flash';setTimeout(()=>tr.classList.remove('flash'),650);
+  const pill=document.createElement('span');pill.className='pill '+b.verdict.toLowerCase();pill.textContent=b.verdict;
+  const cells=[n,pill,b.merchant,money(b.amount),b.rule_fired,lane(b),b.request_id,b.stripe_receipt||short(b.entry_hash)];
+  for(const c of cells){const td=document.createElement('td'); if(c instanceof Node)td.appendChild(c); else td.textContent=c; tr.appendChild(td);}
+  $('ledger').appendChild(tr);
+}
+function addResolutionRow(b,res,approved){
+  const tr=document.createElement('tr');tr.className='flash';setTimeout(()=>tr.classList.remove('flash'),650);
+  const pill=document.createElement('span');pill.className='pill allow';pill.textContent=approved?'APPROVED':'DENIED';
+  const cells=['human',pill,b.merchant,money(b.amount),res.rule_fired,'captured human resolution',b.request_id,short(res.entry_hash)];
+  for(const c of cells){const td=document.createElement('td'); if(c instanceof Node)td.appendChild(c); else td.textContent=c; tr.appendChild(td);}
+  $('ledger').appendChild(tr);
+}
+function renderQueue(){
+  const q=$('queue');q.innerHTML='';q.classList.toggle('show',queue.length>0);
+  queue.forEach(b=>{const item=document.createElement('div');item.className='qitem';item.dataset.id=b.request_id;item.innerHTML=`<div class="qmerchant">${b.merchant} · ${money(b.amount)}</div><div class="qmeta">${b.rule_fired} · ${b.request_id}</div><div class="qtag">pending human</div>`;item.onclick=()=>openApproval(b);q.appendChild(item);});
+}
+function openApproval(b){selected=b;$('approval').classList.add('open');$('apTitle').textContent=b.merchant+' · '+money(b.amount);$('apText').textContent=b.resolution?'Captured resolution exists. Matching it can chain the run.':'No captured resolution for this request. On-screen choice is what-if only and will not write the ledger.';}
+function closeApproval(){$('approval').classList.remove('open');selected=null;}
+function resolveSelected(approved){
+  if(!selected)return;const b=selected;const res=b.resolution;const matches=!!(res&&((approved&&res.verdict==='ALLOW')||(!approved&&res.verdict==='DENY')));
+  queue=queue.filter(x=>x.request_id!==b.request_id);renderQueue();closeApproval();
+  if(matches){written++;addResolutionRow(b,res,approved);setX(b,'captured human resolution chained · '+short(res.entry_hash));$('spineData').textContent='resolution chained · '+short(res.entry_hash);$('audit').classList.add('lit');}
+  else{whatIf++;setX(b,(approved?'approved':'denied')+' on-screen · what-if only · no ledger write');$('spineData').textContent='what-if cleared · no ledger write';$('audit').classList.remove('lit');}
+  $('status').textContent=`queue resolved · chained ${written} · what-if ${whatIf}`;
+}
+function showBeat(b,n){
+  resetCards();governed+=Number(b.amount||0);$('meter').style.width=Math.min(100,(governed/Number(META.operation_window||total))*100)+'%';$('meterText').textContent=money(governed)+' governed in replay · '+money(META.operation_window||total)+' operation window';
+  $('agent').classList.add('lit');$('models').classList.add('lit');$('w1').className.baseVal='wire hot';$('w3').className.baseVal='wire hot';
+  $('agentData').textContent=b.task+' → '+b.merchant+' '+money(b.amount);
+  $('modelData').textContent=lane(b)+' · explicit route telemetry not in this capture';
+  const needsUltra=/ESCALATE|DENY/.test(b.verdict)||/hard|max|deny|invalid|unbound|not_allowlisted|per_txn|currency/i.test(b.rule_fired||'');
+  if(needsUltra){$('ultra').classList.add('lit');$('w2').className.baseVal='wire hot escalate';$('ultraData').textContent='exception context reviewed by role framing';}else{$('ultraData').textContent='';}
+  $('gate').classList.add('lit');$('verdict').textContent=b.verdict;$('verdict').className='verdict '+b.verdict.toLowerCase();$('gateData').textContent=b.rule_fired;
+  let outcome=''; if(b.verdict==='ALLOW'){charged+=Number(b.amount||0);outcome='charge allowed';$('w4').className.baseVal='wire hot';} else if(b.verdict==='ESCALATE'){outcome='held for human';$('w5').className.baseVal='wire hot escalate';queue.push(b);renderQueue();} else {blocked+=Number(b.amount||0);outcome='blocked before money';$('w6').className.baseVal='wire hot deny';}
+  $('outcome').classList.add('lit');$('audit').classList.add('lit');$('w7').className.baseVal='wire hot';$('outcomeData').textContent=outcome;$('moneyData').textContent=money(charged)+' charged · '+money(blocked)+' blocked';$('spineData').textContent='hash '+short(b.entry_hash);
+  addRow(b,n);setX(b,'captured '+b.verdict.toLowerCase());$('status').textContent=`beat ${n} / ${BEATS.length} · ${b.verdict}`;
+}
+function step(){if(idx>=BEATS.length-1){stop();$('status').textContent='complete · captured run replayed';return;}idx++;showBeat(BEATS[idx],idx+1);}
+function play(){if(timer){stop();return;}$('play').textContent='Pause';step();timer=setInterval(step,1150);}
+function stop(){if(timer)clearInterval(timer);timer=null;$('play').textContent='▶ Play captured run';}
+function reset(){stop();idx=-1;governed=0;charged=0;blocked=0;queue=[];selected=null;written=0;whatIf=0;$('ledger').innerHTML='';renderQueue();closeApproval();resetCards();$('agentData').textContent='idle';$('modelData').textContent='route: not captured yet';$('ultraData').textContent='';$('outcomeData').textContent='waiting for first request';$('moneyData').textContent='$0 charged';$('spineData').textContent='hash chain idle';$('meter').style.width='0';$('meterText').textContent='ready';setX(null,'waiting');$('status').textContent='ready · local-only alternate';}
+function init(){$('opWindow').textContent=money(META.operation_window||total);$('capturedTotal').textContent=money(total);$('chargedTotal').textContent=money(chargedCaptured);$('heldTotal').textContent=String(BEATS.filter(b=>b.verdict==='ESCALATE').length);$('blockedTotal').textContent=money(blockedCaptured);$('play').onclick=play;$('step').onclick=step;$('reset').onclick=reset;$('approve').onclick=()=>resolveSelected(true);$('deny').onclick=()=>resolveSelected(false);reset();}
+init();
+</script>
+</body>
+</html>

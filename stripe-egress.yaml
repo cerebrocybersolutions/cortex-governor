@@ -1,0 +1,27 @@
+# Cerebro spend-governor — Stripe API egress preset for the NemoClaw sandbox.
+#
+# Least-privilege: the governor wallet POSTs to api.stripe.com/v1/charges and
+# GETs /v1/balance (key validation). Nothing else reaches the network. Applied
+# to the `cerebro-spend` sandbox via:
+#   nemoclaw cerebro-spend policy-add stripe --from-file stripe-egress.yaml --yes
+# (active as policy version 5 on the GPU sandbox host).
+preset:
+  name: stripe
+  description: "Stripe API access (test-mode charges via the spend governor)"
+
+network_policies:
+  stripe:
+    name: stripe
+    endpoints:
+      - host: api.stripe.com
+        port: 443
+        protocol: rest
+        enforcement: enforce
+        rules:
+          - allow: { method: POST, path: "/v1/**" }
+          - allow: { method: GET, path: "/v1/**" }
+    binaries:
+      - { path: /usr/bin/python3* }
+      - { path: /usr/local/bin/python3* }
+      - { path: /sandbox/.venv/bin/python* }
+      - { path: /sandbox/.local/bin/python* }

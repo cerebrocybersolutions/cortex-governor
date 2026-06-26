@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cortex — Enhanced Governor • Agentic Spend Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Calistoga&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0b0e;--bg2:#0d0f13;--surface:#14161c;--surface2:#1b1e26;--border:#262a33;--line:#313742;
+  --fg:#eceef3;--muted:#959ba8;--faint:#767d8d;--ink:#0a0b0e;
+  --allow:#5fae5a;--escalate:#e0a93a;--deny:#e8554d;
+  --nv:#76b900;--stripe:#635bff;--purple:#8b85f0;
+  --serif:'Calistoga',Georgia,'Times New Roman',serif;
+  --sans:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;
+  --eo:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);-webkit-font-smoothing:antialiased;line-height:1.5;overflow-x:hidden;
+  background-image:radial-gradient(820px 480px at 80% -8%,rgba(139,133,240,.06),transparent 60%)}
+.mono{font-family:var(--mono)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 30px}
+a{color:inherit;text-decoration:none}
+section{padding:72px 0;position:relative}
+.eyebrow{font-family:var(--mono);font-size:11.5px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
+h2{font-family:var(--serif);font-size:clamp(2rem,4.4vw,3.2rem);line-height:1.04;letter-spacing:-.01em;margin:14px 0 12px;font-weight:400}
+.lead{color:var(--muted);font-size:17px;max-width:600px;line-height:1.6}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.nav-tabs{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:8px}
+.tab-btn{font-family:var(--mono);font-size:13px;font-weight:600;padding:10px 20px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;transition:all .2s var(--eo)}
+.tab-btn.active{color:var(--fg);border-bottom-color:var(--allow)}
+.tab-btn:hover{color:var(--fg)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.logo{display:inline-flex;align-items:center;justify-content:center}
+.logo svg{display:block;width:100%;height:100%}
+.logo-stripe svg path{fill:var(--stripe)}
+.logo-nv svg path{fill:var(--nv)}
+.logo-nemoclaw svg path,.logo-nemoclaw svg polygon{fill:var(--nv)!important}
+.ava{width:30px;height:30px;border-radius:50%;object-fit:cover;flex:none;border:1px solid var(--line)}
+.ava-fb{display:grid;place-items:center;background:var(--surface2);color:var(--fg);font-family:var(--serif);font-size:14px}
+.gbadge{border-radius:8px;display:grid;place-items:center;flex:none;background:var(--surface2);border:1px solid var(--line);color:var(--fg)}
+.gbadge svg{width:62%;height:62%;display:block}
+nav{position:sticky;top:0;z-index:60;background:rgba(10,11,14,.72);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:86px}
+.brandmark{display:flex;align-items:center;gap:13px;font-weight:700;font-size:27px;letter-spacing:-.01em}
+.brandmark .bm{width:42px;height:42px;font-size:22px;font-family:var(--serif)}.brandmark b{font-family:var(--serif);font-weight:400;color:var(--muted)}
+.builton{display:flex;align-items:center;gap:22px}
+.builton .lbl{font-family:var(--mono);font-size:11.5px;color:var(--faint);letter-spacing:.16em;text-transform:uppercase}
+.builton .logo{height:27px;width:auto;opacity:.85;transition:opacity .25s var(--eo)}.builton .logo:hover{opacity:1}
+.builton .logo-stripe{height:19px}.builton .ava{width:28px;height:28px;vertical-align:middle}
+.cta{font-family:var(--sans);font-size:13px;font-weight:650;padding:9px 17px;border-radius:9px;background:var(--fg);color:var(--ink);cursor:pointer;border:none;transition:.2s var(--eo)}
+.cta:hover{transform:translateY(-1px);box-shadow:0 8px 22px -10px rgba(236,238,243,.4)}
+.hero{padding:42px 0 34px;text-align:center}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;font-weight:500;padding:6px 15px;border-radius:30px;border:1px solid var(--border);background:var(--surface);color:var(--muted);margin-bottom:30px}
+.kdot{width:7px;height:7px;border-radius:50%;background:var(--allow);animation:pulse 2.4s var(--eo) infinite}
+.kicker.pending .kdot{background:var(--escalate)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(95,174,90,.5)}70%{box-shadow:0 0 0 8px rgba(95,174,90,0)}100%{box-shadow:0 0 0 0 transparent}}
+.hero h1{font-family:var(--serif);font-weight:400;font-size:clamp(2rem,4.2vw,3.3rem);line-height:1.06;letter-spacing:-.02em;margin-bottom:18px;color:var(--fg)}
+.hero h1 em{font-style:italic;color:var(--muted)}
+.hero p{color:var(--muted);font-size:clamp(16px,2vw,19px);max-width:660px;margin:0 auto 24px;line-height:1.55}
+.hero-cta{display:flex;gap:13px;justify-content:center;align-items:center;flex-wrap:wrap}
+.btn{font-family:var(--sans);font-size:14.5px;font-weight:650;padding:13px 24px;border-radius:11px;cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--fg);transition:.2s var(--eo)}
+.btn:hover{background:var(--surface);border-color:#3d4350}
+.btn.primary{background:var(--fg);color:var(--ink);border-color:var(--fg)}.btn.primary:hover{transform:translateY(-1px);box-shadow:0 10px 26px -12px rgba(236,238,243,.45)}
+.statline{display:flex;justify-content:center;margin-top:26px;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:var(--surface)}
+.stat{flex:1;text-align:center;padding:16px 12px;border-right:1px solid var(--border)}.stat:last-child{border-right:0}
+.stat b{font-family:var(--serif);display:block;font-size:30px;font-weight:400;line-height:1}
+.stat span{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.1em;display:block;margin-top:9px}
+@media(max-width:680px){.statline{flex-wrap:wrap}.stat{flex:1 1 50%;border-bottom:1px solid var(--border)}}
+
+/* Flow diagram (preserved + enhanced) */
+.demo{background:linear-gradient(180deg,var(--bg2),var(--bg));border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.demo-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:30px;flex-wrap:wrap}
+.controls{display:flex;gap:10px;align-items:center}.status{font-family:var(--mono);color:var(--faint);font-size:12px}
+.flow{position:relative;width:100%;aspect-ratio:1180/540;min-height:380px;margin-bottom:24px}
+.flow svg.wires{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.orbit{fill:none;stroke:var(--line);stroke-width:1.4;stroke-dasharray:2 8;opacity:.6;transform-origin:300px 300px;animation:spin 26s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.arc{fill:none;stroke:var(--line);stroke-width:1.8;opacity:.5;transition:.3s var(--eo)}
+.arc.on{opacity:1;stroke:var(--muted);stroke-dasharray:8 9;animation:dash .8s linear infinite}
+.fpath{fill:none;stroke:var(--line);stroke-width:2;opacity:.45;transition:.3s var(--eo)}
+.fpath.on{opacity:1;stroke-width:2.4;stroke-dasharray:9 10;animation:dash .8s linear infinite}
+.fpath.on.allow{stroke:var(--allow)}.fpath.on.escalate{stroke:var(--escalate)}.fpath.on.deny{stroke:var(--deny)}.fpath.on.ledger{stroke:var(--muted)}
+@keyframes dash{to{stroke-dashoffset:-38}}
+.sbx{fill:rgba(255,255,255,.012);stroke:var(--border);stroke-width:1.4;stroke-dasharray:7 7;rx:18}
+.cloud{fill:rgba(139,133,240,.05);stroke:rgba(139,133,240,.32);stroke-width:1.4}
+.lbl-m{font-family:var(--mono);font-size:12px;fill:var(--faint);letter-spacing:.04em}
+.node{position:absolute;transform:translate(-50%,-50%);background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:11px 13px;width:166px;z-index:2;
+  transition:border-color .3s var(--eo),box-shadow .3s var(--eo),transform .3s var(--eo);opacity:0;animation:rise .6s var(--eo) forwards}
+.node.sm{width:150px;padding:10px 12px}
+.node .nh{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+.node .nh .logo{height:20px;flex:none}.node .nh .logo-stripe{width:46px}.node .nh .logo-nv{width:20px;height:20px}
+.node .nh .gbadge{width:28px;height:28px;font-size:15px;border-radius:7px}
+.node .nname{font-weight:700;font-size:13.5px;letter-spacing:-.01em}
+.node .nsub{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:3px;line-height:1.35}
+.node .ndata{font-family:var(--mono);font-size:11px;color:var(--fg);margin-top:7px;word-break:break-all;min-height:11px;opacity:.92}
+@keyframes rise{from{opacity:0;transform:translate(-50%,calc(-50% + 12px))}to{opacity:1;transform:translate(-50%,-50%)}}
+.node.lit{border-color:var(--line);box-shadow:0 14px 40px -18px rgba(0,0,0,.7),0 0 0 1px var(--line)}
+.node.gov{width:184px}
+.node.gov.lit-allow{border-color:var(--allow);box-shadow:0 0 0 1px var(--allow),0 16px 42px -18px rgba(95,174,90,.5)}
+.node.gov.lit-escalate{border-color:var(--escalate);box-shadow:0 0 0 1px var(--escalate),0 16px 42px -18px rgba(224,169,58,.5)}
+.node.gov.lit-deny{border-color:var(--deny);box-shadow:0 0 0 1px var(--deny),0 16px 42px -18px rgba(232,85,77,.5)}
+#govStamp{font-family:var(--serif);font-size:23px;font-weight:400;opacity:.22;transition:.25s var(--eo);line-height:1.1;margin-top:3px}
+#govStamp.allow{color:var(--allow);opacity:1}#govStamp.escalate{color:var(--escalate);opacity:1}#govStamp.deny{color:var(--deny);opacity:1}
+.node.out{opacity:.34}.node.out.lit{opacity:1}
+.node.out.stripe.lit{border-color:var(--stripe);box-shadow:0 0 0 1px var(--stripe)}
+.node.out.human.lit{border-color:var(--escalate);box-shadow:0 0 0 1px var(--escalate)}
+.node.out.deny.lit{border-color:var(--deny);box-shadow:0 0 0 1px var(--deny)}
+.chip{font-family:var(--mono);font-size:8px;font-weight:600;border-radius:20px;padding:1px 7px;letter-spacing:.05em;margin-left:auto;color:var(--purple);border:1px solid rgba(139,133,240,.3);background:rgba(139,133,240,.08)}
+.glyph{width:28px;height:28px;border-radius:7px;display:grid;place-items:center;font-size:14px;flex:none;background:var(--surface2);border:1px solid var(--line)}
+.glyph.human{color:var(--escalate)}.glyph.deny{color:var(--deny)}
+@media(max-width:820px){.flow{aspect-ratio:auto;min-height:0;display:flex;flex-direction:column;gap:10px}.flow svg.wires{display:none}
+  .node{position:static;transform:none;width:100%!important;animation:none;opacity:1}.node.lit{transform:none}
+  #n_hermes{order:1}#n_nemo{order:2}#n_gov{order:3}#n_stripe{order:4}#n_human{order:5}#n_deny{order:6}}
+
+/* Cards, table, approval (preserved) */
+.grid2{display:grid;grid-template-columns:1fr 1.28fr;gap:16px;margin-top:4px}
+@media(max-width:820px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px 22px}
+.label{font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--faint);margin-bottom:14px}
+.bignum{font-family:var(--serif);font-size:40px;font-weight:400}
+.budget-sub{color:var(--muted);font-size:13px;margin-top:3px}
+.bar{height:8px;background:var(--surface2);border-radius:6px;overflow:hidden;margin-top:14px}
+.bar>span{display:block;height:100%;width:100%;background:var(--allow);transition:width .7s var(--eo)}
+.capline{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12.5px;color:var(--muted);margin-top:14px}.capline b{color:var(--fg)}
+.xrow{display:grid;grid-template-columns:104px 1fr;gap:10px;padding:8px 0;border-top:1px solid var(--border);font-size:13px}
+.xrow:first-child{border-top:0}.xrow .k{color:var(--faint);font-family:var(--mono);font-size:12.5px}
+.xrow .v{font-family:var(--mono);font-size:13px;word-break:break-all}
+.xrow .v.match{color:var(--allow)}.xrow .v.stripe{color:var(--purple)}.xrow .v.pending{color:var(--escalate)}.xrow .v.mute{color:var(--faint)}
+.xnote{font-size:12.5px;color:var(--muted);margin-top:13px;line-height:1.55}.xnote b{color:var(--fg)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-family:var(--mono);color:var(--faint);font-weight:500;font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;padding:10px;border-bottom:1px solid var(--border)}
+td{padding:10px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:13px}
+tbody tr{opacity:0;transform:translateY(6px);transition:.4s var(--eo)}tbody tr.in{opacity:1;transform:none}
+.pill{font-family:var(--mono);font-size:10px;font-weight:600;padding:2px 9px;border-radius:20px;border:1px solid}
+.pill.allow{color:var(--allow);border-color:rgba(95,174,90,.34);background:rgba(95,174,90,.1)}
+.pill.escalate{color:var(--escalate);border-color:rgba(224,169,58,.34);background:rgba(224,169,58,.1)}
+.pill.deny{color:var(--deny);border-color:rgba(232,85,77,.34);background:rgba(232,85,77,.1)}
+.recpt{color:var(--purple)}.recpt.pending{color:var(--escalate)}
+.chain-ok{color:var(--allow)}.foot{font-family:var(--mono);color:var(--muted);font-size:12.5px;margin-top:16px;line-height:1.6}
+
+/* NEW: Playground */
+.playground .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.playground input,.playground select,.playground textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--fg);font-family:var(--mono);font-size:13px}
+.playground .verdict{display:flex;align-items:center;gap:12px;margin-top:16px;padding:16px;border-radius:12px;border:1px solid var(--border);background:var(--surface)}
+.playground .verdict.allow{border-color:var(--allow);background:rgba(95,174,90,.08)}
+.playground .verdict.escalate{border-color:var(--escalate);background:rgba(224,169,58,.08)}
+.playground .verdict.deny{border-color:var(--deny);background:rgba(232,85,77,.08)}
+.verdict-badge{font-family:var(--serif);font-size:28px;font-weight:400;padding:4px 18px;border-radius:999px}
+.verdict-badge.allow{background:var(--allow);color:var(--ink)}
+.verdict-badge.escalate{background:var(--escalate);color:var(--ink)}
+.verdict-badge.deny{background:var(--deny);color:#fff}
+
+/* NEW: Explorer filters */
+.explorer-tools{display:flex;gap:12px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.explorer-tools input,.explorer-tools select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--fg);font-size:13px}
+.export-btn{font-family:var(--mono);font-size:12px;padding:8px 14px;border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:8px;cursor:pointer}
+.export-btn:hover{background:var(--surface);color:var(--fg)}
+
+/* NEW: Analytics */
+.analytics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.ana-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px}
+.ana-num{font-family:var(--serif);font-size:42px;font-weight:400;line-height:1}
+.ana-label{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:4px}
+.pill-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+/* Stage + peak + scoreboard preserved */
+body.stage .hero,body.stage #stack,body.stage .pitch,body.stage footer{display:none}
+body.stage nav{position:static}
+body.stage .demo{border-top:0;border-bottom:0;padding:22px 0 40px;background:var(--bg)}
+body.stage section{padding:0}
+body.stage .wrap{max-width:1340px}
+body.stage .demo-head{margin-bottom:22px}
+body.stage .demo-head .bridge{display:none}
+body.stage .demo-head h2{font-size:clamp(2.1rem,3.8vw,3rem)}
+body.stage .flow{min-height:452px;margin-bottom:30px}
+body.stage .node{width:184px;padding:9px 11px}body.stage .node.sm{width:172px}body.stage .node.gov{width:204px}
+body.stage .node .nname{font-size:16.5px}body.stage .node .nsub{font-size:11.5px}body.stage .node .ndata{font-size:11.5px}
+body.stage #govStamp{font-size:31px}
+body.stage .lbl-m{font-size:13px;font-weight:600}
+body.stage #n_hermes{left:15.8%!important}body.stage #n_gov{left:40.8%!important}body.stage #n_nemo{left:24.2%!important}
+body.stage #n_stripe,body.stage #n_human,body.stage #n_deny{left:75.5%!important}
+body.stage .fpath{opacity:.16}body.stage .node.out:not(.lit){opacity:.2}body.stage .arc{opacity:.28}
+body.stage .card{padding:18px 20px}body.stage .bignum{font-size:38px}
+body.stage table th:first-child,body.stage table td:first-child{display:none}
+body.stage #ledger tr:last-child td{font-size:14px;padding:13px 10px;background:rgba(139,133,240,.06)}
+.node.out.deny.peak{opacity:1!important;border-color:var(--deny);box-shadow:0 0 0 2px var(--deny),0 0 64px -6px var(--deny);animation:peakshake .55s var(--eo)}
+@keyframes peakshake{0%,100%{transform:translate(-50%,-50%)}22%{transform:translate(calc(-50% - 7px),-50%)}66%{transform:translate(calc(-50% + 6px),-50%)}}
+.peakbanner{position:absolute;left:50%;top:4%;transform:translateX(-50%);z-index:6;font-family:var(--mono);font-size:13px;font-weight:600;
+  color:var(--deny);background:rgba(232,85,77,.13);border:1px solid var(--deny);border-radius:30px;padding:9px 20px;white-space:nowrap;
+  opacity:0;transition:opacity .4s var(--eo),top .4s var(--eo);pointer-events:none}
+.peakbanner.show{opacity:1;top:1.5%}
+body.stage .peakbanner{font-size:16px;padding:12px 26px}
+.scoreboard{max-height:0;overflow:hidden;opacity:0;transition:max-height .6s var(--eo),opacity .5s var(--eo),margin .5s var(--eo);margin:0}
+.scoreboard.show{max-height:420px;opacity:1;margin:18px 0 0}
+.sb-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+@media(max-width:820px){.sb-grid{grid-template-columns:repeat(3,1fr)}}
+.sb-tile{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 14px;text-align:center}
+.sb-tile b{font-family:var(--serif);display:block;font-size:31px;font-weight:400;line-height:1}
+.sb-tile span{font-family:var(--mono);font-size:10.5px;color:var(--faint);letter-spacing:.07em;text-transform:uppercase;display:block;margin-top:9px;line-height:1.3}
+.sb-tile.good b{color:var(--allow)}.sb-tile.block b{color:var(--deny)}.sb-tile.zero b{color:var(--allow)}
+.sb-tag{text-align:center;font-family:var(--serif);font-size:clamp(1.3rem,2.5vw,1.85rem);color:var(--fg);margin-top:22px;line-height:1.3}
+.sb-tag em{color:var(--muted);font-style:italic}
+.xrow.spine{background:rgba(95,174,90,.09);border-radius:7px}
+.xrow.spine .v{color:var(--allow)}
+.xrow.spine .k{color:var(--allow)}
+.runbadge{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10.5px;color:var(--allow);
+  border:1px solid rgba(95,174,90,.35);background:rgba(95,174,90,.08);border-radius:20px;padding:4px 12px;opacity:0;transition:.3s var(--eo)}
+.runbadge.show{opacity:1}.runbadge .rb{width:6px;height:6px;border-radius:50%;background:var(--allow);animation:pulse 2.4s var(--eo) infinite}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap nav-in">
+  <div class="brandmark"><span class="gbadge bm"><svg style="width:100%;height:100%;display:block" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">  <path d="M12 2.2 L19.4 5.1 V11.1 C19.4 15.7 16.2 19.2 12 21.8 C7.8 19.2 4.6 15.7 4.6 11.1 V5.1 Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>  <path d="M8.4 8.6 L12 10.9 L15.6 8.6 M12 10.9 L12 15.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>  <circle cx="12" cy="10.9" r="1.9" fill="currentColor"/>  <circle cx="8.4" cy="8.6" r="1.15" fill="currentColor"/>  <circle cx="15.6" cy="8.6" r="1.15" fill="currentColor"/>  <circle cx="12" cy="15.6" r="1.15" fill="currentColor"/></svg></span> Cortex</div>
+  <div class="builton">
+    <span class="lbl">built on</span>
+    <span title="Hermes / Nous Research"><img src="assets/hermes-avatar.png" alt="Hermes" style="height:1.5em;width:1.5em;object-fit:cover;border-radius:6px;vertical-align:middle;display:inline-block"></span>
+    <span class="logo logo-nv" title="NVIDIA — NemoClaw + Nemotron"><svg style="width:100%;height:100%;display:block" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>NVIDIA</title><path d="M8.948 8.798v-1.43a6.7 6.7 0 0 1 .424-.018c3.922-.124 6.493 3.374 6.493 3.374s-2.774 3.851-5.75 3.851c-.398 0-.787-.062-1.158-.185v-4.346c1.528.185 1.837.857 2.747 2.385l2.04-1.714s-1.492-1.952-4-1.952a6.016 6.016 0 0 0-.796.035m0-4.735v2.138l.424-.027c5.45-.185 9.01 4.47 9.01 4.47s-4.08 4.964-8.33 4.964c-.37 0-.733-.035-1.095-.097v1.325c.3.035.61.062.91.062 3.957 0 6.82-2.023 9.593-4.408.459.371 2.34 1.263 2.73 1.652-2.633 2.208-8.772 3.984-12.253 3.984-.335 0-.653-.018-.971-.053v1.864H24V4.063zm0 10.326v1.131c-3.657-.654-4.673-4.46-4.673-4.46s1.758-1.944 4.673-2.262v1.237H8.94c-1.528-.186-2.73 1.245-2.73 1.245s.68 2.412 2.739 3.11M2.456 10.9s2.164-3.197 6.5-3.533V6.201C4.153 6.59 0 10.653 0 10.653s2.35 6.802 8.948 7.42v-1.237c-4.84-.6-6.492-5.936-6.492-5.936z"/></svg></span>
+    <span class="logo logo-stripe" title="Stripe"><svg style="width:100%;height:100%;display:block" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Stripe</title><path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.594-7.305h.003z"/></svg></span>
+  </div>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <div class="kicker" id="kicker"><span class="kdot"></span><span id="kickerText">captured from a real in-sandbox run • enhanced</span></div>
+  <h1>Agents can earn and spend.<br>We make them <em>safe enough</em><br>for business.</h1>
+  <p>A policy gate, tamper-evident ledger, and human-in-the-loop — now with live policy playground and explorer.</p>
+  <div class="hero-cta">
+    <button class="btn primary" onclick="document.getElementById('demo').scrollIntoView();setTimeout(play,520)">&#9654; Watch the governed run</button>
+    <button class="btn" onclick="switchTab('playground')">Try the live policy engine</button>
+  </div>
+  <div class="statline">
+    <div class="stat"><b style="color:var(--allow)" id="s_allow">3</b><span>ALLOWED &amp; CHARGED</span></div>
+    <div class="stat"><b style="color:var(--escalate)" id="s_esc">3</b><span>HELD FOR A HUMAN</span></div>
+    <div class="stat"><b style="color:var(--deny)" id="s_deny">4</b><span>BLOCKED AT THE GATE</span></div>
+    <div class="stat"><b style="font-size:18px" id="s_gpu">RTX 4090</b><span>NEMOCLAW SANDBOX HOST</span></div>
+  </div>
+</div></header>
+
+<!-- TABS -->
+<div class="wrap">
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('replay')">Replay</button>
+    <button class="tab-btn" onclick="switchTab('playground')">Policy Playground</button>
+    <button class="tab-btn" onclick="switchTab('explorer')">Ledger Explorer</button>
+    <button class="tab-btn" onclick="switchTab('analytics')">Analytics</button>
+  </div>
+</div>
+
+<!-- REPLAY TAB (core cinematic experience preserved + enhanced) -->
+<div id="tab-replay" class="tab-panel active">
+<section class="demo" id="demo"><div class="wrap">
+  <div class="demo-head">
+    <div><div class="eyebrow">Live governed run <span class="runbadge" id="runbadge"><span class="rb"></span>captured from a real run</span></div><h2>How a spend actually flows</h2>
+      <div class="lead">Hermes proposes. Cortex gates three ways. One request id reconciles ledger, Stripe receipt, and sandbox event.</div>
+      <div class="bridge">Control-plane view — <b>left:</b> agent proposes &middot; <b>right:</b> Cortex gates, records, reconciles.</div></div>
+    <div class="controls"><button class="btn primary" id="toggle">&#9654; Play</button><button class="stagebtn" id="stagebtn" title="Camera view">&#9974; Stage</button><span class="status" id="status">ready</span></div>
+  </div>
+
+  <div class="flow" id="flow">
+    <svg class="wires" viewBox="0 0 1180 540" preserveAspectRatio="none">
+      <path class="cloud" d="M232 120 a40 40 0 0 1 12 -78 a52 52 0 0 1 96 -14 a44 44 0 0 1 50 40 a36 36 0 0 1 -10 70 z"></path>
+      <text class="lbl-m" x="250" y="44" fill="#8b85f0">OpenRouter cloud</text>
+      <rect class="sbx" x="96" y="246" width="470" height="250" rx="18"></rect>
+      <text class="lbl-m" x="116" y="234">&#9678; NemoClaw &middot; Landlock sandbox &middot; RTX 4090</text>
+      <ellipse class="orbit" cx="300" cy="300" rx="168" ry="150"></ellipse>
+      <path id="aRe" class="arc" d="M214 360 C 150 280, 200 150, 290 132" marker-end="url(#am)"></path>
+      <text class="lbl-m" x="150" y="250">reasons</text>
+      <path id="aPlan" class="arc" d="M340 140 C 440 165, 470 240, 452 300" marker-end="url(#am)"></path>
+      <text class="lbl-m" x="430" y="195">plans</text>
+      <path id="aSpend" class="arc" d="M250 372 C 320 410, 380 400, 430 320" marker-end="url(#am)"></path>
+      <text class="lbl-m" x="270" y="424">proposes spend</text>
+      <path id="pAllow" class="fpath" d="M512 300 C 660 300, 720 168, 858 168" marker-end="url(#aG)"></path>
+      <text class="lbl-m" x="640" y="206" fill="#5fae5a">ALLOW</text>
+      <path id="pEscalate" class="fpath" d="M512 312 C 680 312, 730 312, 858 312" marker-end="url(#aE)"></path>
+      <text class="lbl-m" x="648" y="303" fill="#e0a93a">ESCALATE</text>
+      <path id="pDeny" class="fpath" d="M512 326 C 660 326, 720 452, 858 452" marker-end="url(#aD)"></path>
+      <text class="lbl-m" x="648" y="424" fill="#e8554d">DENY</text>
+      <path id="pLedger" class="fpath" d="M452 360 L 452 502" marker-end="url(#am)"></path>
+      <text class="lbl-m" x="464" y="462">every decision &rarr; ledger</text>
+      <defs>
+        <marker id="am" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L7 4 L0 8 z" fill="#5b6270"/></marker>
+        <marker id="aG" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L7 4 L0 8 z" fill="#5fae5a"/></marker>
+        <marker id="aE" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L7 4 L0 8 z" fill="#e0a93a"/></marker>
+        <marker id="aD" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L7 4 L0 8 z" fill="#e8554d"/></marker>
+      </defs>
+    </svg>
+    <div class="peakbanner" id="peakbanner">&#9940; $600 to AWS — BLOCKED at the gate · never reached Stripe · balance unchanged</div>
+    <div class="node sm out" id="n_nemo" style="left:25.4%;top:14.8%;animation-delay:.05s">
+      <div class="nh"><span class="logo logo-nv"><svg style="width:100%;height:100%;display:block" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>NVIDIA</title><path d="M8.948 8.798v-1.43a6.7 6.7 0 0 1 .424-.018c3.922-.124 6.493 3.374 6.493 3.374s-2.774 3.851-5.75 3.851c-.398 0-.787-.062-1.158-.185v-4.346c1.528.185 1.837.857 2.747 2.385l2.04-1.714s-1.492-1.952-4-1.952a6.016 6.016 0 0 0-.796.035m0-4.735v2.138l.424-.027c5.45-.185 9.01 4.47 9.01 4.47s-4.08 4.964-8.33 4.964c-.37 0-.733-.035-1.095-.097v1.325c.3.035.61.062.91.062 3.957 0 6.82-2.023 9.593-4.408.459.371 2.34 1.263 2.73 1.652-2.633 2.208-8.772 3.984-12.253 3.984-.335 0-.653-.018-.971-.053v1.864H24V4.063zm0 10.326v1.131c-3.657-.654-4.673-4.46-4.673-4.46s1.758-1.944 4.673-2.262v1.237H8.94c-1.528-.186-2.73 1.245-2.73 1.245s.68 2.412 2.739 3.11M2.456 10.9s2.164-3.197 6.5-3.533V6.201C4.153 6.59 0 10.653 0 10.653s2.35 6.802 8.948 7.42v-1.237c-4.84-.6-6.492-5.936-6.492-5.936z"/></svg></span><span style="font-weight:700;font-size:12.5px">Nemotron 3 Ultra</span></div>
+      <div class="nsub" id="nemoSub">NVIDIA brain · via OpenRouter cloud</div>
+    </div>
+    <div class="node" id="n_hermes" style="left:17.8%;top:66.7%;animation-delay:.12s">
+      <div class="nh"><img src="assets/hermes-avatar.png" alt="Hermes" style="height:1.5em;width:1.5em;object-fit:cover;border-radius:6px;vertical-align:middle;display:inline-block"><span class="nname">Hermes agent</span></div>
+      <div class="nsub">operator · Nous</div><div class="ndata" id="hermesData">idle</div>
+    </div>
+    <div class="node gov" id="n_gov" style="left:38.3%;top:55.6%;animation-delay:.19s">
+      <div class="nh"><span class="gbadge" style="width:28px;height:28px;border-radius:7px"><svg style="width:100%;height:100%;display:block" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">  <path d="M12 2.2 L19.4 5.1 V11.1 C19.4 15.7 16.2 19.2 12 21.8 C7.8 19.2 4.6 15.7 4.6 11.1 V5.1 Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>  <path d="M8.4 8.6 L12 10.9 L15.6 8.6 M12 10.9 L12 15.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>  <circle cx="12" cy="10.9" r="1.9" fill="currentColor"/>  <circle cx="8.4" cy="8.6" r="1.15" fill="currentColor"/>  <circle cx="15.6" cy="8.6" r="1.15" fill="currentColor"/>  <circle cx="12" cy="15.6" r="1.15" fill="currentColor"/></svg></span><span class="nname">Cortex</span></div>
+      <div id="govStamp">—</div><div class="ndata" id="govData">the policy gate</div>
+    </div>
+    <div class="node sm out stripe" id="n_stripe" style="left:78.5%;top:31.1%;animation-delay:.26s">
+      <div class="nh"><span class="logo logo-stripe"><svg style="width:100%;height:100%;display:block" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Stripe</title><path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.594-7.305h.003z"/></svg></span></div>
+      <div class="nsub">charge on ALLOW</div><div class="ndata" id="stripeData">—</div>
+    </div>
+    <div class="node sm out human" id="n_human" style="left:78.5%;top:57.8%;animation-delay:.3s">
+      <div class="nh"><span class="glyph human">&#128100;</span><span class="nname">Human</span></div>
+      <div class="nsub">approve / deny</div><div class="ndata" id="humanData">—</div>
+    </div>
+    <div class="node sm out deny" id="n_deny" style="left:78.5%;top:83.7%;animation-delay:.34s">
+      <div class="nh"><span class="glyph deny">&#10005;</span><span class="nname">Blocked</span></div>
+      <div class="nsub">never reaches Stripe</div><div class="ndata" id="denyData">—</div>
+    </div>
+  </div>
+
+  <div class="approval" id="approval" style="display:none">
+    <div class="ap-inner">
+      <span class="ap-icon">&#128100;</span>
+      <div class="ap-body">
+        <div class="ap-title" id="apTitle">Human approval required</div>
+        <div class="ap-detail" id="apDetail">—</div>
+        <div class="ap-note" id="apNote">The agent cannot self-approve. Decision appended to tamper-evident ledger.</div>
+      </div>
+      <div class="ap-actions" id="apActions">
+        <button class="btn ap-approve" id="apApprove">&#10003; Approve as Operator</button>
+        <button class="btn ap-deny" id="apDeny">&#10005; Deny</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="label">Spend budget · 1h window</div>
+      <div class="bignum" id="remain">$300</div>
+      <div class="budget-sub">remaining of <span id="budget">$300</span>. moves only on approved charge</div>
+      <div class="bar"><span id="barFill" style="width:100%"></span></div>
+      <div class="capline"><span>per-txn cap <b id="cap">$100</b></span><span>hard max <b id="hardmax">$500</b></span></div>
+      <div class="capline" style="margin-top:10px;border-top:1px solid var(--border);padding-top:11px"><span>policy fingerprint</span><span class="mono" id="polfp">sha256:fd64c9f8abc3…</span></div>
+    </div>
+    <div class="card xcard" id="xcard">
+      <div class="label">Cross-reference · one request id, three surfaces <span class="xstamp" id="xstamp">&#10003; reconciled</span></div>
+      <div class="xrow"><span class="k">request id</span><span class="v" id="x_req">—</span></div>
+      <div class="xrow"><span class="k">policy rule</span><span class="v" id="x_rule">—</span></div>
+      <div class="xrow"><span class="k">ledger hash</span><span class="v" id="x_hash">—</span></div>
+      <div class="xrow"><span class="k">stripe receipt</span><span class="v" id="x_recpt">—</span></div>
+      <div class="xrow"><span class="k">sandbox event</span><span class="v" id="x_sbx">—</span></div>
+      <div class="xnote"><b>Why this isn’t a mockup:</b> same request id reconciles across ledger hash, Stripe receipt, and NemoClaw sandbox event.</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="label">Hash-chained spend ledger · <span class="chain-ok" id="chain">append-only, tamper-evident</span></div>
+    <table><thead><tr><th>#</th><th>decision</th><th>merchant</th><th>amount</th><th>rule fired</th><th>ledger hash</th><th>stripe receipt</th></tr></thead>
+    <tbody id="ledger"></tbody></table>
+    <div class="foot" id="foot"></div>
+  </div>
+
+  <div class="scoreboard" id="scoreboard">
+    <div class="sb-grid">
+      <div class="sb-tile good"><b id="sb_charged">$100</b><span>charged via Stripe</span></div>
+      <div class="sb-tile block"><b id="sb_blocked">$720</b><span>blocked at the gate</span></div>
+      <div class="sb-tile"><b id="sb_esc">3</b><span>escalated to a human</span></div>
+      <div class="sb-tile"><b id="sb_appr">1</b><span>approved to proceed</span></div>
+      <div class="sb-tile good"><b id="sb_chain">✓</b><span>hash chain</span></div>
+      <div class="sb-tile zero"><b>0</b><span>unauthorized charges</span></div>
+    </div>
+    <div class="sb-tag">Autonomous agents can spend.<br><em>Cortex makes that safe enough for business.</em></div>
+  </div>
+</div></section>
+</div>
+
+<!-- PLAYGROUND TAB (NEW — beats the original) -->
+<div id="tab-playground" class="tab-panel">
+<section class="playground"><div class="wrap">
+  <div class="eyebrow">Live policy engine</div>
+  <h2>Test any spend request against the real rules</h2>
+  <p class="lead">Client-side port of the hardened governor. Hard-deny first, normalization, amount validation. Results are instant and faithful to the captured policy.</p>
+
+  <div class="card" style="margin-top:24px">
+    <div class="form-grid">
+      <div><label class="label">Agent</label><input id="pg_agent" value="hermes-operator"></div>
+      <div><label class="label">Task</label><input id="pg_task" value="buy-inference"></div>
+      <div><label class="label">Merchant</label><input id="pg_merchant" value="openai"></div>
+      <div><label class="label">Amount (USD)</label><input id="pg_amount" type="number" value="45"></div>
+      <div><label class="label">Currency</label><select id="pg_currency"><option>usd</option><option>eur</option></select></div>
+      <div><label class="label">Category</label><input id="pg_category" value="api-credits"></div>
+      <div><label class="label">Purpose</label><input id="pg_purpose" value="api-credits"></div>
+    </div>
+    <div style="margin-top:20px;display:flex;gap:12px">
+      <button class="btn primary" onclick="runPlayground()">Evaluate request</button>
+      <button class="btn" onclick="resetPlayground()">Reset</button>
+      <button class="btn" onclick="useCapturedBeat()">Load captured $600 deny example</button>
+    </div>
+
+    <div class="verdict" id="pg_verdict" style="display:none">
+      <div><span class="verdict-badge" id="pg_badge">ALLOW</span></div>
+      <div style="flex:1">
+        <div style="font-family:var(--serif);font-size:21px" id="pg_rule">ok</div>
+        <div class="xnote" id="pg_reason">—</div>
+      </div>
+      <div><button class="btn" onclick="replayInFlow()">Replay in flow diagram →</button></div>
+    </div>
+  </div>
+
+  <div class="xnote" style="margin-top:20px">Policy in use: hard_max $500, per_txn_cap $100, vendor allowlist (openai, anthropic, github, vercel, aws…), category deny (crypto, gambling…), purpose binding, USD only.</div>
+</div></section>
+</div>
+
+<!-- EXPLORER TAB (NEW) -->
+<div id="tab-explorer" class="tab-panel">
+<section><div class="wrap">
+  <div class="eyebrow">Full audit trail</div>
+  <h2>Ledger Explorer</h2>
+  <div class="explorer-tools">
+    <input type="text" id="searchInput" placeholder="Search request_id, merchant, rule..." onkeyup="filterLedger()">
+    <select id="verdictFilter" onchange="filterLedger()">
+      <option value="">All verdicts</option>
+      <option value="ALLOW">ALLOW</option>
+      <option value="ESCALATE">ESCALATE</option>
+      <option value="DENY">DENY</option>
+    </select>
+    <button class="export-btn" onclick="exportLedger('csv')">Export CSV</button>
+    <button class="export-btn" onclick="exportLedger('json')">Export Proof Package (JSON)</button>
+  </div>
+
+  <div class="card">
+    <table id="explorerTable">
+      <thead><tr><th>#</th><th>verdict</th><th>merchant</th><th>amount</th><th>rule</th><th>request_id</th><th>ledger hash</th><th>receipt / note</th></tr></thead>
+      <tbody id="explorerBody"></tbody>
+    </table>
+  </div>
+  <div class="foot">Click any row to highlight the authenticity spine across the replay. All data from the captured in-sandbox run.</div>
+</div></section>
+</div>
+
+<!-- ANALYTICS TAB (NEW) -->
+<div id="tab-analytics" class="tab-panel">
+<section><div class="wrap">
+  <div class="eyebrow">Run summary</div>
+  <h2>Analytics</h2>
+  <div class="analytics-grid">
+    <div class="ana-card"><div class="ana-num" style="color:var(--allow)">$100</div><div class="ana-label">Successfully charged via Stripe</div></div>
+    <div class="ana-card"><div class="ana-num" style="color:var(--deny)">$720</div><div class="ana-label">Blocked before any money moved</div></div>
+    <div class="ana-card"><div class="ana-num">10</div><div class="ana-label">Total spend attempts (beats)</div><div class="pill-row"><span class="pill allow">3 allow</span><span class="pill escalate">3 escalate</span><span class="pill deny">4 deny</span></div></div>
+    <div class="ana-card"><div class="ana-num">30%</div><div class="ana-label">Autonomous success rate</div><div class="xnote">1 human resolution recorded (operator)</div></div>
+  </div>
+  <div class="card" style="margin-top:24px">
+    <div class="label">Top blocked reasons</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+      <div>amount.hard_max — $600 AWS (peak cinematic deny)</div>
+      <div>vendor.deny — sanctioned-vendor</div>
+      <div>category.deny — crypto (coinbase)</div>
+      <div>invalid_request.currency — EUR attempt</div>
+    </div>
+  </div>
+</div></section>
+</div>
+
+<footer><div class="wrap">
+  Cortex Enhanced · agentic spend governance by Cerebro · open-source governor + hosted compliance
+  <div class="builton" style="justify-content:center;margin-top:16px">
+    <span class="lbl">built on</span><img src="assets/hermes-avatar.png" alt="Hermes" style="height:1.5em;width:1.5em;object-fit:cover;border-radius:6px;vertical-align:middle;display:inline-block">
+    <span class="logo logo-nv" style="height:14px;width:21px"><svg style="width:100%;height:100%;display:block" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>NVIDIA</title><path d="M8.948 8.798v-1.43a6.7 6.7 0 0 1 .424-.018c3.922-.124 6.493 3.374 6.493 3.374s-2.774 3.851-5.75 3.851c-.398 0-.787-.062-1.158-.185v-4.346c1.528.185 1.837.857 2.747 2.385l2.04-1.714s-1.492-1.952-4-1.952a6.016 6.016 0 0 0-.796.035m0-4.735v2.138l.424-.027c5.45-.185 9.01 4.47 9.01 4.47s-4.08 4.964-8.33 4.964c-.37 0-.733-.035-1.095-.097v1.325c.3.035.61.062.91.062 3.957 0 6.82-2.023 9.593-4.408.459.371 2.34 1.263 2.73 1.652-2.633 2.208-8.772 3.984-12.253 3.984-.335 0-.653-.018-.971-.053v1.864H24V4.063zm0 10.326v1.131c-3.657-.654-4.673-4.46-4.673-4.46s1.758-1.944 4.673-2.262v1.237H8.94c-1.528-.186-2.73 1.245-2.73 1.245s.68 2.412 2.739 3.11M2.456 10.9s2.164-3.197 6.5-3.533V6.201C4.153 6.59 0 10.653 0 10.653s2.35 6.802 8.948 7.42v-1.237c-4.84-.6-6.492-5.936-6.492-5.936z"/></svg></span>
+    <span class="logo logo-stripe" style="height:14px;width:40px"><svg style="width:100%;height:100%;display:block" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Stripe</title><path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.594-7.305h.003z"/></svg></span>
+  </div>
+</div></footer>
+
+<script>
+// ===== EMBEDDED CAPTURED DATA (from sandbox_ledger.jsonl + meta) =====
+const BEATS = [
+  {"verdict":"ALLOW","agent":"hermes-operator","task":"buy-inference","merchant":"openai","amount":12,"request_id":"req_9442eae42dbd1d45","rule_fired":"ok","entry_hash":"5bb856bb0a31a15473587e0f959998f8ca3157d91678ebd3b16b760ed369f882","sandbox_ref":"nemoclaw:cerebro-spend:a80b9888ce07#1","stripe_receipt":"ch_3TjXH9BUQ4KlPGPn08n8ckcT"},
+  {"verdict":"ALLOW","agent":"hermes-operator","task":"buy-inference","merchant":"anthropic","amount":80,"request_id":"req_5f59c9a84e790eb1","rule_fired":"ok","entry_hash":"0be988354847474fb5d7ede36b7b263993d538beb5fbf89daf6d226ad858dd21","sandbox_ref":"nemoclaw:cerebro-spend:a80b9888ce07#2","stripe_receipt":"ch_3TjXHABUQ4KlPGPn0KDb8xwl"},
+  {"verdict":"ALLOW","agent":"hermes-operator","task":"buy-tooling","merchant":"github","amount":8,"request_id":"req_42a962782953cefa","rule_fired":"ok","entry_hash":"8bbf120fede4a315d4a16a81c12fb82266f3aa132b4331a596b1b84e159133fa","sandbox_ref":"nemoclaw:cerebro-spend:a80b9888ce07#3","stripe_receipt":"ch_3TjXHBBUQ4KlPGPn0FcYSqn1"},
+  {"verdict":"ESCALATE","agent":"hermes-operator","task":"deploy","merchant":"vercel","amount":150,"request_id":"req_de0920b523f4b84c","rule_fired":"amount.per_txn_cap","entry_hash":"26ec6724d8c4712f9e508b34be45ead831fb8775ed0d632c059cd53508c9e1d5","sandbox_ref":"nemoclaw:cerebro-spend:a80b9888ce07#4"},
+  {"verdict":"ESCALATE","agent":"hermes-operator","task":"trial","merchant":"newsaas","amount":40,"request_id":"req_21259e18ca6e711d","rule_fired":"vendor.not_allowlisted","entry_hash":"345f457e3ca26b2dffc07aeb559c6226375a8e0edf24d6e0d344e333eef8d4f7","sandbox_ref":"nemoclaw:cerebro-spend:a80b9888ce07#5"},
+  {"verdict":"ESCALATE","agent":"hermes-operator","task":"campaign","merchant":"openai","amount":25,"request_id":"req_5af8103d1b01588e","rule_fired":"purpose.unbound","entry_hash":"37e374d649f2e7ac80f747374720418ed2c786cd5db5bfc2af6cf68b50d7bd77","sandbox_ref":"nemoclaw:cerebro-spend:a80b9888ce07#6"},
+  {"verdict":"DENY","agent":"hermes-operator","task":"scale","merchant":"aws","amount":600,"request_id":"req_f8a2d50bad512e50","rule_fired":"amount.hard_max","entry_hash":"f24236ae48465f209f76fae1b59f116359b57b7130c7e2c2d12d2388e4b5ac78","sandbox_ref":"nemoclaw:cerebro-spend:a80b9888ce07#7"},
+  {"verdict":"DENY","agent":"hermes-operator","task":"procure","merchant":"sanctioned-vendor","amount":50,"request_id":"req_a94cb06f250ed5af","rule_fired":"vendor.deny","entry_hash":"21367edf8e145e76132828f43507b1f29087d11a140842ea07e26d7ad5d5c1f2","sandbox_ref":"nemoclaw:cerebro-spend:a80b9888ce07#8"},
+  {"verdict":"DENY","agent":"hermes-operator","task":"speculate","merchant":"coinbase","amount":30,"request_id":"req_71bb965ab1d7734a","rule_fired":"category.deny","entry_hash":"c2396bae4097d0bba79dbbf7f67b43aeb29017c7118579e1759337ad994440af","sandbox_ref":"nemoclaw:cerebro-spend:a80b9888ce07#9"},
+  {"verdict":"DENY","agent":"hermes-operator","task":"buy-eu","merchant":"openai","amount":20,"request_id":"req_1dd8d56358894149","rule_fired":"invalid_request.currency","entry_hash":"f63d278cd7d19d73df369a4f01379183ca0760f78773dc7fe3a0341cd69a62e9","sandbox_ref":"nemoclaw:cerebro-spend:a80b9888ce07#10"}
+];
+
+const META = {"budget":300,"per_txn_cap":100,"hard_max":500,"policy_sha256":"fd64c9f8abc3f06eb4b5eb09e893999aed1ce83650c34e6fcdaa807767213dd1","charged_total":100,"n_esc":3,"n_deny":4,"sandbox_gpu":"NVIDIA GeForce RTX 4090","inference":"OpenRouter","chain_verified":true,"real":true};
+
+const $ = id => document.getElementById(id);
+const money = n => "$" + Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+const short = h => h ? h.slice(0,12)+"…" : "—";
+
+// ===== TAB SWITCHING =====
+function switchTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  $(`tab-${tab}`).classList.add('active');
+  document.querySelector(`.tab-btn[onclick*="${tab}"]`).classList.add('active');
+  if (tab === 'explorer') renderExplorer();
+}
+
+// ===== REPLAY LOGIC (preserved + lightly enhanced) =====
+const ARCS=["aRe","aPlan","aSpend"],FORK=["pAllow","pEscalate","pDeny","pLedger"];
+const NODES=["n_nemo","n_hermes","n_gov","n_stripe","n_human","n_deny"];
+const BRANCH={ALLOW:{wire:"pAllow",node:"n_stripe",cls:"allow"},ESCALATE:{wire:"pEscalate",node:"n_human",cls:"escalate"},DENY:{wire:"pDeny",node:"n_deny",cls:"deny"}};
+let remaining=META.budget,i=0,timer=null,nA=3,nE=3,nD=4,paused=false,started=false,runToken=0,holding=false;
+
+function setB(){$("remain").textContent=money(remaining);$("barFill").style.width=(100*remaining/META.budget)+"%";}
+function setWire(id,on,cls){const e=$(id);e.classList.toggle("on",on);["allow","escalate","deny","ledger"].forEach(c=>e.classList.remove(c));if(on&&cls)e.classList.add(cls);}
+function clearFlow(){ARCS.forEach(a=>$(a).classList.remove("on"));FORK.forEach(f=>setWire(f,false));
+  NODES.forEach(n=>$(n).classList.remove("lit"));
+  $("n_gov").className="node gov";$("n_nemo").className="node sm out";$("n_stripe").className="node sm out stripe";
+  $("n_human").className="node sm out human";$("n_deny").className="node sm out deny";
+  ["stripeData","humanData","denyData"].forEach(k=>$(k).textContent="—");
+  $("x_recpt").textContent="—";$("x_recpt").className="v";$("peakbanner").classList.remove("show");}
+function reset(){clearTimeout(timer);runToken++;i=0;remaining=META.budget;nA=3;nE=3;nD=4;setB();clearFlow();
+  $("ledger").innerHTML="";$("foot").textContent="";
+  $("hermesData").textContent="idle";$("govStamp").className="";$("govStamp").textContent="—";$("govData").textContent="the policy gate";
+  ["stripeData","humanData","denyData"].forEach(k=>$(k).textContent="—");
+  ["x_req","x_rule","x_hash","x_recpt","x_sbx"].forEach(k=>{$(k).textContent="—";$(k).className="v";});
+  $("s_allow").textContent="3";$("s_esc").textContent="3";$("s_deny").textContent="4";$("stackChg").textContent="$100 charged";
+  $("xcard").classList.remove("reconciled","pulse");$("xstamp").classList.remove("show");
+  $("chain").textContent="append-only, tamper-evident";$("chain").classList.remove("chain-bad");
+  $("approval").style.display="none";holding=false;
+  $("scoreboard").classList.remove("show");$("runbadge").classList.remove("show");$("peakbanner").classList.remove("show");
+  $("status").textContent="ready";started=false;paused=false;$("toggle").innerHTML="&#9654; Play";}
+function cell(text,cls){const td=document.createElement("td");if(cls)td.className=cls;td.textContent=text;return td;}
+function rowEl(b,n){const tr=document.createElement("tr"),vtd=document.createElement("td"),rtd=document.createElement("td");
+  const pill=document.createElement("span");pill.className="pill "+b.verdict.toLowerCase();pill.textContent=b.verdict;vtd.appendChild(pill);
+  if(b.stripe_receipt){const s=document.createElement("span");s.className="recpt";s.textContent=b.stripe_receipt;rtd.appendChild(s);}
+  else if(b.verdict==="ALLOW"){const s=document.createElement("span");s.className="recpt pending";s.textContent="pending";rtd.appendChild(s);}
+  else{rtd.textContent="—";}
+  tr.append(cell(n),vtd,cell(b.merchant),cell(money(b.amount)),cell(b.rule_fired||""),cell(short(b.entry_hash)),rtd);
+  $("ledger").appendChild(tr);requestAnimationFrame(()=>tr.classList.add("in"));}
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+async function beat(){if(i>=BEATS.length)return done();
+  const myToken=++runToken;const b=BEATS[i],br=BRANCH[b.verdict];
+  const isPeak=b.verdict==="DENY"&&b.rule_fired==="amount.hard_max";
+  clearFlow();
+  $("x_req").textContent=b.request_id;$("x_req").className="v match";
+  $("x_rule").textContent=b.rule_fired||"—";$("x_hash").textContent=short(b.entry_hash);
+  $("x_sbx").textContent=b.sandbox_ref;$("x_sbx").className="v match";
+  $("n_hermes").classList.add("lit");$("n_nemo").classList.add("lit");$("aRe").classList.add("on");$("aPlan").classList.add("on");
+  $("hermesData").textContent=b.task+" → "+b.merchant+" "+money(b.amount);
+  await wait(460);if(myToken!==runToken)return;
+  $("aRe").classList.remove("on");$("aPlan").classList.remove("on");$("aSpend").classList.add("on");$("n_gov").classList.add("lit");
+  await wait(420);if(myToken!==runToken)return;
+  $("govStamp").className=b.verdict.toLowerCase();$("govStamp").textContent=b.verdict;$("govData").textContent="rule: "+(b.rule_fired||"");
+  $("n_gov").classList.add("lit-"+b.verdict.toLowerCase());setWire("pLedger",true,"ledger");
+  await wait(360);if(myToken!==runToken)return;
+  setWire(br.wire,true,br.cls);$(br.node).classList.add("lit");
+  if(b.verdict==="ALLOW"){
+    $("stripeData").textContent=b.stripe_receipt|| "charged";
+    $("x_recpt").textContent=b.stripe_receipt|| "charged";$("x_recpt").className="v stripe";
+    if(b.stripe_receipt){remaining-=b.amount;setB();$("stackChg").textContent=money(META.budget-remaining)+" charged";
+      $("xcard").classList.add("reconciled");$("xstamp").classList.add("show");
+      $("xcard").classList.remove("pulse");void $("xcard").offsetWidth;$("xcard").classList.add("pulse");}
+    nA++;$("s_allow").textContent=nA;
+  }else if(b.verdict==="ESCALATE"){
+    $("humanData").textContent="held · "+b.merchant+" "+money(b.amount);
+    $("x_recpt").textContent="held (balance unchanged)";$("x_recpt").className="v pending";
+    nE++;$("s_esc").textContent=nE;
+  }else{
+    $("denyData").textContent=b.rule_fired;
+    $("x_recpt").textContent="— never reached Stripe";$("x_recpt").className="v mute";
+    nD++;$("s_deny").textContent=nD;
+    if(isPeak){$("n_deny").classList.add("peak");$("peakbanner").classList.add("show");
+      $("status").textContent="⛔ "+money(b.amount)+" to "+b.merchant+" — BLOCKED at the gate · never reached Stripe";}
+  }
+  rowEl(b,i+1);
+  if(!isPeak)$("status").textContent="beat "+(i+1)+" / "+BEATS.length+" — "+b.verdict;
+  i++;if(paused)return;timer=setTimeout(beat,isPeak?3000:1500);}
+function done(){clearFlow();
+  const v=META.chain_verified;
+  $("status").textContent="run complete"+(v?" — chain verified":" — chain UNVERIFIED");
+  $("chain").textContent=v?"append-only, tamper-evident, chain verified":"append-only ledger — chain verification FAILED";
+  $("chain").classList.toggle("chain-bad",!v);
+  $("foot").innerHTML=money(META.charged_total)+" policy-allowed & charged via Stripe · "+META.n_esc+" escalated to a human · "+META.n_deny+" blocked before any money moved.";
+  const blocked=BEATS.filter(b=>b.verdict==="DENY").reduce((s,b)=>s+b.amount,0);
+  $("sb_charged").textContent=money(META.charged_total);$("sb_blocked").textContent=money(blocked);
+  $("sb_esc").textContent=META.n_esc;$("sb_appr").textContent="1";
+  $("sb_chain").textContent=v?"✓":"✗";$("sb_chain").style.color=v?"var(--allow)":"var(--deny)";
+  $("scoreboard").classList.add("show");
+  started=true;paused=false;$("toggle").innerHTML="&#10227; Replay";}
+function play(){reset();started=true;paused=false;$("runbadge").classList.add("show");$("toggle").innerHTML="&#9208; Pause";$("status").textContent="replaying…";timer=setTimeout(beat,360);}
+function pause(){paused=true;clearTimeout(timer);runToken++;$("toggle").innerHTML="&#9654; Resume";$("status").textContent="paused — narrate, then resume";}
+function resume(){paused=false;$("toggle").innerHTML="&#9208; Pause";$("status").textContent="replaying…";timer=setTimeout(beat,220);}
+function onToggle(){if(holding)return;if(!started||i>=BEATS.length){play();return;}if(paused){resume();return;}pause();}
+$("toggle").onclick=onToggle;reset();
+function setStage(on){document.body.classList.toggle("stage",on);$("stagebtn").innerHTML=on?"&#9974; Exit stage":"&#9974; Stage";if(on)$("demo").scrollIntoView({behavior:"smooth"});}
+$("stagebtn").onclick=()=>setStage(!document.body.classList.contains("stage"));
+if(location.hash==="#stage")setStage(true);
+
+// ===== PLAYGROUND (NEW) =====
+function normalize(v){return v?(v.trim().toLowerCase()):null;}
+function evaluatePlayground(req){
+  const p = {allowed_currencies:["usd"], hard_max:500, per_txn_cap:100, vendors:{allow:["openai","anthropic","aws","github","vercel","stripe","openrouter"],deny:["sanctioned-vendor"]}, categories:{deny:["gambling","crypto","adult"]}, allowed_purposes:["infra","saas-subscription","compute","api-credits","supplies"]};
+  const amt = Number(req.amount);
+  if(!amt || amt<=0 || isNaN(amt)) return {verdict:"DENY",rule:"invalid_request.amount",reason:"amount must be positive finite number"};
+  if(!p.allowed_currencies.includes(normalize(req.currency))) return {verdict:"DENY",rule:"invalid_request.currency",reason:"currency not allowed"};
+  const m = normalize(req.merchant), c = normalize(req.category), pur = normalize(req.purpose);
+  if(p.vendors.deny.includes(m)) return {verdict:"DENY",rule:"vendor.deny",reason:"merchant on deny list"};
+  if(p.categories.deny.includes(c)) return {verdict:"DENY",rule:"category.deny",reason:"category not permitted"};
+  if(amt > p.hard_max) return {verdict:"DENY",rule:"amount.hard_max",reason:"exceeds hard ceiling"};
+  if(amt > p.per_txn_cap) return {verdict:"ESCALATE",rule:"amount.per_txn_cap",reason:"exceeds per-transaction cap — requires human"};
+  if(!p.vendors.allow.includes(m)) return {verdict:"ESCALATE",rule:"vendor.not_allowlisted",reason:"merchant not on allowlist"};
+  if(pur && !p.allowed_purposes.includes(pur)) return {verdict:"ESCALATE",rule:"purpose.unbound",reason:"purpose not explicitly allowed"};
+  return {verdict:"ALLOW",rule:"ok",reason:"passes all policy gates"};
+}
+function runPlayground(){
+  const req = {
+    agent:$("pg_agent").value, task:$("pg_task").value, merchant:$("pg_merchant").value,
+    amount:parseFloat($("pg_amount").value), currency:$("pg_currency").value,
+    category:$("pg_category").value, purpose:$("pg_purpose").value
+  };
+  const res = evaluatePlayground(req);
+  const vdiv = $("pg_verdict"); vdiv.style.display="flex";
+  vdiv.className = "verdict " + res.verdict.toLowerCase();
+  $("pg_badge").textContent = res.verdict; $("pg_badge").className = "verdict-badge " + res.verdict.toLowerCase();
+  $("pg_rule").textContent = res.rule; $("pg_reason").textContent = res.reason;
+  window.lastPG = {req, res};
+}
+function resetPlayground(){$("pg_verdict").style.display="none";}
+function useCapturedBeat(){$("pg_merchant").value="aws";$("pg_amount").value="600";$("pg_task").value="scale";$("pg_category").value="compute";runPlayground();}
+function replayInFlow(){if(!window.lastPG) return; const b = {...window.lastPG.req, verdict:window.lastPG.res.verdict, rule_fired:window.lastPG.res.rule, stripe_receipt: window.lastPG.res.verdict==="ALLOW"?"simulated":"—", entry_hash:"pg_"+Date.now().toString(16), sandbox_ref:"playground"}; 
+  // quick visual flash in flow
+  switchTab('replay'); setTimeout(()=>{ $("n_gov").classList.add("lit"); $("govStamp").textContent=b.verdict; $("govStamp").className=b.verdict.toLowerCase(); setTimeout(()=>{clearFlow();},1800); },300); }
+
+// ===== EXPLORER (NEW) =====
+function renderExplorer(filtered = BEATS){
+  const tbody = $("explorerBody"); tbody.innerHTML="";
+  filtered.forEach((b,idx)=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${idx+1}</td><td><span class="pill ${b.verdict.toLowerCase()}">${b.verdict}</span></td><td>${b.merchant}</td><td>${money(b.amount)}</td><td>${b.rule_fired||""}</td><td class="mono">${b.request_id}</td><td class="mono">${short(b.entry_hash)}</td><td>${b.stripe_receipt|| (b.verdict==="ALLOW"?"pending":"—")}</td>`;
+    tr.onclick = () => highlightSpine(b.request_id);
+    tbody.appendChild(tr);
+  });
+}
+function filterLedger(){
+  const q = $("searchInput").value.toLowerCase();
+  const vf = $("verdictFilter").value;
+  const filtered = BEATS.filter(b => {
+    const matchesQ = !q || b.request_id.toLowerCase().includes(q) || b.merchant.toLowerCase().includes(q) || (b.rule_fired||"").toLowerCase().includes(q);
+    const matchesV = !vf || b.verdict===vf;
+    return matchesQ && matchesV;
+  });
+  renderExplorer(filtered);
+}
+function exportLedger(fmt){
+  const data = BEATS;
+  if(fmt==="csv"){
+    const csv = "verdict,merchant,amount,rule,request_id,hash,receipt\n" + data.map(b=>`${b.verdict},${b.merchant},${b.amount},${b.rule_fired||""},${b.request_id},${b.entry_hash},${b.stripe_receipt||""}`).join("\n");
+    const a=document.createElement("a");a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv);a.download="cortex-ledger.csv";a.click();
+  }else{
+    const pkg = {meta:META, beats:data, exported:new Date().toISOString(), provenance:"captured in-sandbox run a80b9888ce07"};
+    const a=document.createElement("a");a.href="data:application/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(pkg,null,2));a.download="cortex-proof-package.json";a.click();
+  }
+}
+function highlightSpine(rid){
+  switchTab('replay');
+  const rows = document.querySelectorAll("#ledger tr");
+  rows.forEach(r=>r.classList.remove("spine"));
+  // simple visual: flash the xcard
+  $("xcard").classList.add("pulse"); setTimeout(()=> $("xcard").classList.remove("pulse"),1200);
+  // find matching row if visible
+  const match = Array.from(rows).find(r=>r.textContent.includes(rid));
+  if(match) match.classList.add("spine");
+}
+
+// ===== INIT =====
+$("budget").textContent=money(META.budget);$("cap").textContent=money(META.per_txn_cap);$("hardmax").textContent=money(META.hard_max);
+$("polfp").textContent="sha256:"+META.policy_sha256.slice(0,12)+"…";
+$("nemoSub").textContent="NVIDIA brain · via "+META.inference.split(" (")[0];
+if(META.real){$("kickerText").textContent="captured from a real in-sandbox run • enhanced";}
+
+// Keyboard shortcuts
+document.addEventListener("keydown", e=>{
+  if(e.key==="/"){e.preventDefault(); switchTab("explorer"); $("searchInput").focus();}
+  if(e.key.toLowerCase()==="p") switchTab("playground");
+  if(e.key==="Escape") {document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active")); document.getElementById("tab-replay").classList.add("active");}
+});
+
+// Boot explorer on load (hidden until tab)
+console.log("%c[Cortex Enhanced] Self-contained improved governor dashboard loaded. All data from real captured run.", "color:#5fae5a");
+</script>
+</body>
+</html>

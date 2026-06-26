@@ -1,0 +1,19 @@
+{
+  "origin": "in-sandbox",
+  "sandbox": "cerebro-spend",
+  "runtime": "NemoClaw \u2014 Landlock-confined sandbox",
+  "sandbox_gpu": "NVIDIA GeForce RTX 4090",
+  "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+  "inference": "OpenRouter (compatible-endpoint)",
+  "operator": "Hermes agent",
+  "run_id": "a80b9888ce07",
+  "host": "bc4fe9a04163",
+  "n_charged": 3,
+  "total_charged": 100.0,
+  "policy": {
+    "budget": 300.0,
+    "per_txn_cap": 100.0,
+    "hard_max": 500.0,
+    "sha256": "fd64c9f8abc3f06eb4b5eb09e893999aed1ce83650c34e6fcdaa807767213dd1"
+  }
+}

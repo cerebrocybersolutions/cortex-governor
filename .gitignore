@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*ledger*.jsonl
+*tampered*.jsonl
+*.checkpoint
+assets/*.png
+
+# Shipped tamper-evidence bundle: the exact captured ledger + its out-of-band
+# capture-time checkpoint anchor. Committed so a post-ship ledger edit is caught
+# against git history — the on-screen "tamper-evident / audit-grade" claim.
+!sandbox_ledger.jsonl
+!sandbox_ledger.jsonl.checkpoint

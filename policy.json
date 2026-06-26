@@ -1,0 +1,19 @@
+{
+  "_comment": "Default governor policy. amount in USD. Footage scale 2026-06-25: $100 per-txn cap / $500 hard-max, $100k operation window (rate_window.max_amount). Matches the footage, OSS repo, and submission.",
+  "allowed_currencies": ["usd"],
+  "hard_max": 500.0,
+  "per_txn_cap": 100.0,
+  "vendors": {
+    "allow": ["openai", "anthropic", "aws", "github", "vercel", "stripe", "openrouter"],
+    "deny": ["sanctioned-vendor"]
+  },
+  "categories": {
+    "deny": ["gambling", "crypto", "adult"]
+  },
+  "rate_window": {
+    "seconds": 3600,
+    "max_count": 100,
+    "max_amount": 100000.0
+  },
+  "allowed_purposes": ["infra", "saas-subscription", "compute", "api-credits", "supplies"]
+}
