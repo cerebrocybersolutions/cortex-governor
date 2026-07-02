@@ -10,3 +10,5 @@ assets/*.png
 # against git history — the on-screen "tamper-evident / audit-grade" claim.
 !sandbox_ledger.jsonl
 !sandbox_ledger.jsonl.checkpoint
+demo_policy.json
+.claude-flow/

@@ -1,7 +1,26 @@
 # Cortex: The Spend-Control Plane for Autonomous Agents
 
+[![tests](https://github.com/cerebrocybersolutions/cortex-governor/actions/workflows/tests.yml/badge.svg)](https://github.com/cerebrocybersolutions/cortex-governor/actions/workflows/tests.yml) ![Dependencies](https://img.shields.io/badge/dependencies-none%20(stdlib)-blue) ![License](https://img.shields.io/badge/license-Apache--2.0-lightgrey)
+
 Policy, approval, audit, and payment control between any autonomous agent and the
 money it can spend. The layer that lets a company safely give an agent a budget.
+
+## Quickstart
+
+Python 3.9+. Standard library only: no dependencies, no API keys, no network.
+
+```bash
+git clone https://github.com/cerebrocybersolutions/cortex-governor
+cd cortex-governor
+python3 demo_scenario.py     # 12-beat policy walk + ledger tamper test, exits 0 on PASS
+python3 autonomous_demo.py   # escalate -> human approve -> resume loop
+python3 -m pytest -q         # 55 tests
+```
+
+The demo scenario runs offline against a derived demo policy (the shipped
+`policy.json` with the rate window tightened so the finale trips in 12 beats).
+No real money can move: the Stripe path is test-mode only and is not touched
+by any of the commands above.
 
 ## Demo
 
@@ -83,3 +102,7 @@ real business safely let agents run.
 - `cortex-enhanced.html` - control surface + live policy playground.
 - `index-live.html` / `index.html` - the captured demo dashboard and its locked snapshot.
 - `test_*.py` - 55 tests over the engine, ledger, escalation, capture gate, and crossref proof.
+
+## License
+
+Apache-2.0. See [LICENSE](LICENSE).

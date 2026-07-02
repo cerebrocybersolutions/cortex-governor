@@ -27,6 +27,14 @@ from ledger import Ledger
 _HERE = Path(__file__).resolve().parent
 DEMO_LEDGER = _HERE / "demo_ledger.jsonl"      # gitignored; fresh each run
 POLICY = _HERE / "policy.json"
+DEMO_POLICY = _HERE / "demo_policy.json"       # gitignored; derived each run
+
+# The shipped policy.json carries the production-scale $100k/hour window (it is
+# pinned to the captured footage + submission and must not drift). At that scale
+# the rate-window finale below could never trip in 12 beats — so the demo derives
+# its own policy: same rules, window tightened to $300/hour. Derived at runtime
+# from policy.json, so every OTHER rule the demo exercises stays the shipped one.
+DEMO_RATE_WINDOW_MAX = 300.0
 
 # Glyphs for the decision column (kept ASCII-safe for terminal + screen-record).
 MARK = {ALLOW: "[ALLOW ]", ESCALATE: "[ESCAL.]", DENY: "[DENY  ]"}
@@ -95,6 +103,16 @@ def run():
     DEMO_LEDGER.unlink(missing_ok=True)
     DEMO_LEDGER.with_name(DEMO_LEDGER.name + ".checkpoint").unlink(missing_ok=True)
 
+    # Derive the demo policy from the shipped one (see DEMO_RATE_WINDOW_MAX note).
+    demo_policy = json.loads(POLICY.read_text())
+    demo_policy["rate_window"]["max_amount"] = DEMO_RATE_WINDOW_MAX
+    demo_policy["_comment"] = (
+        "DERIVED for demo_scenario.py — policy.json with the rate window "
+        "tightened to $%d/hour so the finale trips. Regenerated every run."
+        % DEMO_RATE_WINDOW_MAX
+    )
+    DEMO_POLICY.write_text(json.dumps(demo_policy, indent=2) + "\n")
+
     print("=" * 74)
     print("  CEREBRO GOVERNOR — agentic-spend demo (offline, no real money)")
     print("  Stripe lets an agent hold a card. Cerebro lets it run unattended.")
@@ -105,7 +123,7 @@ def run():
     tally = {ALLOW: 0, DENY: 0, ESCALATE: 0}
     fails = 0
     for label, req, exp_verdict, exp_rule in SCENARIO:
-        dec = gate(req, policy_path=POLICY, ledger_path=DEMO_LEDGER)
+        dec = gate(req, policy_path=DEMO_POLICY, ledger_path=DEMO_LEDGER)
         tally[dec.verdict] += 1
         ok = dec.verdict == exp_verdict and dec.rule.startswith(exp_rule)
         fails += 0 if ok else 1
