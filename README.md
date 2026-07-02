@@ -14,7 +14,7 @@ git clone https://github.com/cerebrocybersolutions/cortex-governor
 cd cortex-governor
 python3 demo_scenario.py     # 12-beat policy walk + ledger tamper test, exits 0 on PASS
 python3 autonomous_demo.py   # escalate -> human approve -> resume loop
-python3 -m pytest -q         # 55 tests
+python3 -m pytest -q         # 68 tests
 ```
 
 The demo scenario runs offline against a derived demo policy (the shipped
@@ -79,6 +79,30 @@ test mode; no real funds move.
   peaking on a blocked $600 over-limit spend.
 - `index.html` - a locked snapshot of that run (frozen; the live build cannot clobber it).
 
+## Hermes skill
+
+`skills/spend-governor/SKILL.md` is a drop-in Hermes agent skill (NousResearch
+skill format). It binds the agent to one rule: no payment by any means without
+an ALLOW from the gate for that exact spend. The gate's exit code is the
+contract (0 ALLOW / 2 ESCALATE / 1 DENY), the escalation path goes through the
+ledger-bound human approval in `escalation.py`, and the skill names the
+anti-patterns (amount-splitting, purpose-rewording, spend-then-gate) as
+capability-revoking violations.
+
+## Stripe Issuing: the gate as the card's brain
+
+`issuing_gate.py` runs the governor as a Stripe Issuing real-time authorization
+decision endpoint: each agent holds a test-mode virtual card, every swipe
+becomes an `issuing_authorization.request` webhook, and the gate approves or
+declines before the network does. Stricter than the CLI path by design:
+Issuing allows no human window, so ESCALATE maps to DECLINE (fail closed) and
+the attempt still lands on the ledger for out-of-band approval and retry.
+Webhook signatures are verified (constant-time, replay-window enforced), the
+transport refuses any non-test key, and the whole path is covered by offline
+tests against synthetic authorization payloads — no Issuing account needed to
+run them. Wiring it live takes a Stripe TEST account with Issuing enabled,
+`STRIPE_WEBHOOK_SECRET`, `STRIPE_TEST_KEY`, and `python3 issuing_gate.py serve`.
+
 ## On-prem by design
 
 The agent reasons on a local RTX 4090 inside a Landlock-confined NemoClaw sandbox
@@ -101,7 +125,9 @@ real business safely let agents run.
 - `policy.json` - the enforced policy: caps, allow / deny lists, rate window.
 - `cortex-enhanced.html` - control surface + live policy playground.
 - `index-live.html` / `index.html` - the captured demo dashboard and its locked snapshot.
-- `test_*.py` - 55 tests over the engine, ledger, escalation, capture gate, and crossref proof.
+- `skills/spend-governor/SKILL.md` - the Hermes agent skill that binds an agent to the gate.
+- `issuing_gate.py` - Stripe Issuing real-time authorization bridge (test-mode only).
+- `test_*.py` - 68 tests over the engine, ledger, escalation, capture gate, crossref proof, and Issuing bridge.
 
 ## License
 
